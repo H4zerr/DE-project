@@ -102,7 +102,7 @@ def init_database():
     if GA_SESSIONS_TABLE in tables:
         print(f"Таблица {GA_SESSIONS_TABLE} уже в базе")
     else:
-        df_sessions = pd.read_parquet(os.path.join(DATA_PATH, 'ga_sessions.parquet.gz'))
+        df_sessions = pd.read_parquet(os.path.join(DATA_PATH, 'ga_session.parquet.gz'))
         change_date(df_sessions, 'visit_date')
         change_time(df_sessions, 'visit_time')
         create_query(sql_session, conn)
