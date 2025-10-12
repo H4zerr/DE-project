@@ -1,0 +1,7 @@
+data/*
+.venv/*
+.idea/*
+config/*
+logs/*
+plugins/*
+.env
