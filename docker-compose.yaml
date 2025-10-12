@@ -16,6 +16,9 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    POSTGRES_USER: admin
+    POSTGRES_PASSWORD: admin
+    POSTGRES_DB: sber_db
     _PIP_ADDITIONAL_REQUIREMENTS: >
       pandas
       sqlalchemy

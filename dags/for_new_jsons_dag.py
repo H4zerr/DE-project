@@ -3,6 +3,8 @@ from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 import pandas as pd
 import json
+
+from numpy.matlib import empty
 from sqlalchemy import create_engine
 import psycopg2
 from datetime import datetime, timedelta
@@ -17,7 +19,9 @@ DB_NAME = os.getenv("POSTGRES_DB")
 def load_json():
     engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
 
-    processed_files_path = "opt/airflow/data/processed_files.txt"
+    processed_files_path = "/opt/airflow/data/processed_files.txt"
+    os.makedirs(os.path.dirname(processed_files_path), exist_ok=True)
+
     if not os.path.isfile(processed_files_path):
         open(processed_files_path, 'w').close()
 
@@ -32,10 +36,24 @@ def load_json():
     for filename in new_files:
         filepath = os.path.join(DATA_PATH, filename)
 
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"Ошибка чтения {filename}:{e}")
+            continue
+        if not data or (isinstance(data, dict) and all(len(v) == 0 for v in data.values())):
+            print(f'Файл {filename} пустой или некорректный - пропущен.')
+            continue
 
-        df = pd.json_normalize(data)
+        all_arrows = []
+        for v in data.values():
+            all_arrows.extend(v)
+        df = pd.DataFrame(all_arrows)
+
+        if df.empty:
+            print(f'Файл {filename} не содержит данных - пропущен')
+            continue
 
         if 'session' in filename.lower():
             table_name = "ga_sessions"
@@ -79,9 +97,9 @@ with DAG(
     catchup=False,
 ) as dag:
 
-    load_json = PythonOperator(
+    load_json_task = PythonOperator(
         task_id='load_json',
         python_callable=load_json,
     )
 
-    load_json
+    load_json_task

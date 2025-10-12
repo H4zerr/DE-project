@@ -39,7 +39,7 @@ def load_data(df, table_name, chunk_size):
     for i in range(0, len(df), chunk_size):
         df_chunk = df[i:i + chunk_size]
         df_chunk.to_sql(table_name, con=engine, if_exists='append', index=False, method='multi')
-        print(f'Часть {i // chunk_size + 1} из {count_chunks} загружено в таблицу {table_name()}')
+        print(f'Часть {i // chunk_size + 1} из {count_chunks} загружено в таблицу {table_name}')
 
 def return_query(sql_query, connect):
     with connect.cursor() as cursor:
@@ -49,8 +49,8 @@ def return_query(sql_query, connect):
 
 def init_database():
     conn = psycopg2.connect(
-        HOST=HOST,
-        PORT=5432,
+        host=HOST,
+        port=5432,
         user=USER,
         password=PASSWORD,
         dbname=DB,
